@@ -2,7 +2,7 @@
  * SealChat App
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -12,8 +12,12 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
+import ChatScreen from './src/screens/ChatScreen';
 
 function App(): React.JSX.Element {
+  const [currentScreen, setCurrentScreen] = useState('home'); // 'home' 或 'chat'
+  const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  
   // 定义颜色
   const COLORS = {
     primary: '#FFC107',     // 黄色作为主色调
@@ -61,15 +65,22 @@ function App(): React.JSX.Element {
   };
   
   // 处理聊天项点击
-  const handleChatPress = (chatId: string) => {
-    console.log('Navigate to chat', chatId);
+  const handleChatPress = (chatId: string, chatName: string) => {
+    setSelectedChat(chatName);
+    setCurrentScreen('chat');
+  };
+  
+  // 处理返回主页
+  const handleGoBack = () => {
+    setCurrentScreen('home');
+    setSelectedChat(null);
   };
 
   // 渲染聊天项
   const renderChatItem = ({item}: {item: any}) => (
     <TouchableOpacity 
       style={styles.chatItem} 
-      onPress={() => handleChatPress(item.id)}
+      onPress={() => handleChatPress(item.id, item.name)}
     >
       <Image source={{ uri: item.avatar }} style={styles.avatar} />
       <View style={styles.contentContainer}>
@@ -109,7 +120,8 @@ function App(): React.JSX.Element {
     </View>
   );
 
-  return (
+  // 渲染主页
+  const renderHomeScreen = () => (
     <View style={[styles.container, {backgroundColor: COLORS.background}]}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
       
@@ -133,6 +145,19 @@ function App(): React.JSX.Element {
       {renderTabBar()}
     </View>
   );
+  
+  // 渲染聊天界面
+  const renderChatScreen = () => (
+    <View style={styles.container}>
+      <ChatScreen 
+        route={{ params: { contactName: selectedChat || 'Chat' } }}
+        navigation={{ goBack: handleGoBack }}
+      />
+    </View>
+  );
+
+  // 根据当前屏幕状态渲染不同界面
+  return currentScreen === 'home' ? renderHomeScreen() : renderChatScreen();
 }
 
 const styles = StyleSheet.create({
