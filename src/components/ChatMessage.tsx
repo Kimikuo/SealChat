@@ -1,21 +1,40 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
 
 interface ChatMessageProps {
-  text: string;
+  text?: string;
+  imageUrl?: string;
   isOwn: boolean;
   avatar?: string;
   timestamp?: string;
+  imageOrientation?: 'horizontal' | 'vertical';
 }
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ text, isOwn, avatar, timestamp }) => {
+const { width } = Dimensions.get('window');
+const MAX_IMAGE_WIDTH = width * 0.6; // 图片最大宽度为屏幕宽度的60%
+
+const ChatMessage: React.FC<ChatMessageProps> = ({ text, imageUrl, isOwn, avatar, timestamp, imageOrientation = 'horizontal' }) => {
   return (
     <View style={[styles.container, isOwn ? styles.ownContainer : styles.otherContainer]}>
       {!isOwn && avatar && (
         <Image source={{ uri: avatar }} style={styles.avatar} />
       )}
       <View style={[styles.bubble, isOwn ? styles.ownBubble : styles.otherBubble]}>
-        <Text style={[styles.text, isOwn ? styles.ownText : styles.otherText]}>{text}</Text>
+        {text && (
+          <Text style={[styles.text, isOwn ? styles.ownText : styles.otherText]}>{text}</Text>
+        )}
+        {imageUrl && (
+          <TouchableOpacity activeOpacity={0.9}>
+            <Image 
+              source={{ uri: imageUrl }} 
+              style={[
+                styles.messageImage,
+                imageOrientation === 'vertical' ? styles.verticalImage : styles.horizontalImage
+              ]} 
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
+        )}
       </View>
       {isOwn && avatar && (
         <Image source={{ uri: avatar }} style={styles.avatar} />
@@ -39,9 +58,8 @@ const styles = StyleSheet.create({
   },
   bubble: {
     maxWidth: '70%',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     borderRadius: 20,
+    overflow: 'hidden',
   },
   ownBubble: {
     backgroundColor: '#F7A10D',
@@ -53,6 +71,8 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   ownText: {
     color: '#FFFFFF',
@@ -65,6 +85,16 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     marginHorizontal: 8,
+  },
+  messageImage: {
+    width: MAX_IMAGE_WIDTH,
+    borderRadius: 0,
+  },
+  horizontalImage: {
+    height: MAX_IMAGE_WIDTH / 16 * 9, // 横向16:9的宽高比
+  },
+  verticalImage: {
+    height: MAX_IMAGE_WIDTH / 9 * 16, // 竖向16:9的宽高比
   },
 });
 

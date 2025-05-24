@@ -6,10 +6,12 @@ import ChatInput from '../components/ChatInput';
 
 interface Message {
   id: string;
-  text: string;
+  text?: string;
+  imageUrl?: string;
   isOwn: boolean;
   avatar?: string;
   timestamp?: string;
+  imageOrientation?: 'horizontal' | 'vertical';
 }
 
 interface ChatScreenProps {
@@ -37,25 +39,70 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
     },
     {
       id: '2',
-      text: '可以，我去试试',
+      text: '这个软件有什么特点？安全吗？',
       isOwn: true,
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      timestamp: '09:12 am'
+      timestamp: '09:11 am'
     },
     {
       id: '3',
-      text: '明天一起出去玩吧，天气不错',
+      text: '它基于区块链技术，所有消息都经过端到端加密，非常安全。而且支持去中心化身份认证。',
       isOwn: false,
       avatar: 'https://randomuser.me/api/portraits/women/17.jpg',
-      timestamp: '09:15 am'
+      timestamp: '09:12 am'
     },
     {
       id: '4',
-      text: '没问题，我们叫上Miller一起',
+      text: '听起来不错，我去下载看看。',
+      isOwn: true,
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: '09:13 am'
+    },
+    {
+      id: '5',
+      imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop',
+      isOwn: true,
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: '09:15 am',
+      imageOrientation: 'horizontal'
+    },
+    {
+      id: '6',
+      text: '我早就下载好了，你看图片，这是我们公司大楼',
+      isOwn: true,
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: '09:15 am'
+    },
+    {
+      id: '7',
+      imageUrl: 'https://images.unsplash.com/photo-1555952494-efd681c7e3f9?q=80&w=1160&auto=format&fit=crop',
+      isOwn: false,
+      avatar: 'https://randomuser.me/api/portraits/women/17.jpg',
+      timestamp: '09:16 am',
+      imageOrientation: 'vertical'
+    },
+    {
+      id: '8',
+      text: '这是我们的新办公室，刚刚装修好',
+      isOwn: false,
+      avatar: 'https://randomuser.me/api/portraits/women/17.jpg',
+      timestamp: '09:16 am'
+    },
+    {
+      id: '9',
+      text: '看起来很不错！我们下周一起去参观一下吧',
       isOwn: true,
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
       timestamp: '09:17 am'
     },
+    {
+      id: '10',
+      imageUrl: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop',
+      isOwn: true,
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: '09:18 am',
+      imageOrientation: 'horizontal'
+    }
   ]);
 
   // 监听键盘显示/隐藏事件
@@ -106,6 +153,32 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
     setMessages([...messages, newMessage]);
   };
 
+  // 模拟发送图片
+  const handleSendImage = () => {
+    // 随机选择一个图片URL和方向
+    const imageOptions = [
+      // 横向图片
+      { url: 'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=2070&auto=format&fit=crop', orientation: 'horizontal' },
+      { url: 'https://images.unsplash.com/photo-1682687220208-22d7a2543e88?q=80&w=2070&auto=format&fit=crop', orientation: 'horizontal' },
+      // 竖向图片
+      { url: 'https://images.unsplash.com/photo-1555952494-efd681c7e3f9?q=80&w=1160&auto=format&fit=crop', orientation: 'vertical' },
+      { url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1064&auto=format&fit=crop', orientation: 'vertical' },
+    ];
+    
+    const randomImage = imageOptions[Math.floor(Math.random() * imageOptions.length)];
+    
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      imageUrl: randomImage.url,
+      isOwn: true,
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      imageOrientation: randomImage.orientation as 'horizontal' | 'vertical'
+    };
+    
+    setMessages([...messages, newMessage]);
+  };
+
   const renderTimestamp = (timestamp: string) => {
     return (
       <View style={styles.timestampContainer}>
@@ -150,9 +223,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
                 renderTimestamp(item.timestamp || '') : null}
               <ChatMessage 
                 text={item.text} 
+                imageUrl={item.imageUrl}
                 isOwn={item.isOwn} 
                 avatar={item.avatar} 
-                timestamp={item.timestamp} 
+                timestamp={item.timestamp}
+                imageOrientation={item.imageOrientation}
               />
             </>
           )}
@@ -168,11 +243,21 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
         {Platform.OS === 'ios' ? (
           <>
             <View style={styles.inputContainer}>
-              <ChatInput onSendMessage={handleSendMessage} />
+              <View style={styles.inputRow}>
+                <ChatInput onSendMessage={handleSendMessage} />
+                <TouchableOpacity style={styles.imageButton} onPress={handleSendImage}>
+                  <Ionicons name="image" size={24} color="#F7A10D" />
+                </TouchableOpacity>
+              </View>
             </View>
           </>
         ) : (
-          <ChatInput onSendMessage={handleSendMessage} />
+          <View style={styles.inputRow}>
+            <ChatInput onSendMessage={handleSendMessage} />
+            <TouchableOpacity style={styles.imageButton} onPress={handleSendImage}>
+              <Ionicons name="image" size={24} color="#F7A10D" />
+            </TouchableOpacity>
+          </View>
         )}
       </KeyboardAvoidingView>
     </View>
@@ -230,6 +315,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#1A1A1A',
     borderTopWidth: 0.5,
     borderTopColor: '#333333',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imageButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
   },
 });
 
