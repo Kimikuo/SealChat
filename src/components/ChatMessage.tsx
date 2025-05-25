@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import VideoPlayerModal from './VideoPlayerModal';
 
 interface ChatMessageProps {
   text?: string;
   imageUrl?: string;
+  videoUrl?: string;
+  videoThumbnail?: string;
   isOwn: boolean;
   avatar?: string;
   timestamp?: string;
@@ -13,7 +17,28 @@ interface ChatMessageProps {
 const { width } = Dimensions.get('window');
 const MAX_IMAGE_WIDTH = width * 0.6; // 图片最大宽度为屏幕宽度的60%
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ text, imageUrl, isOwn, avatar, timestamp, imageOrientation = 'horizontal' }) => {
+const ChatMessage: React.FC<ChatMessageProps> = ({ 
+  text, 
+  imageUrl, 
+  videoUrl,
+  videoThumbnail,
+  isOwn, 
+  avatar, 
+  timestamp, 
+  imageOrientation = 'horizontal'
+}) => {
+  const [videoModalVisible, setVideoModalVisible] = useState(false);
+
+  const handlePlayVideo = () => {
+    if (videoUrl) {
+      setVideoModalVisible(true);
+    }
+  };
+
+  const closeVideoModal = () => {
+    setVideoModalVisible(false);
+  };
+
   return (
     <View style={[styles.container, isOwn ? styles.ownContainer : styles.otherContainer]}>
       {!isOwn && avatar && (
@@ -23,7 +48,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ text, imageUrl, isOwn, avatar
         {text && (
           <Text style={[styles.text, isOwn ? styles.ownText : styles.otherText]}>{text}</Text>
         )}
-        {imageUrl && (
+        
+        {imageUrl && !videoUrl && (
           <TouchableOpacity activeOpacity={0.9}>
             <Image 
               source={{ uri: imageUrl }} 
@@ -35,9 +61,35 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ text, imageUrl, isOwn, avatar
             />
           </TouchableOpacity>
         )}
+
+        {videoUrl && videoThumbnail && (
+          <TouchableOpacity activeOpacity={0.8} onPress={handlePlayVideo} style={styles.videoContainer}>
+            <Image 
+              source={{ uri: videoThumbnail }} 
+              style={[
+                styles.videoThumbnail,
+                imageOrientation === 'vertical' ? styles.verticalImage : styles.horizontalImage
+              ]} 
+              resizeMode="cover"
+            />
+            <View style={styles.playButtonContainer}>
+              <View style={styles.playButton}>
+                <Ionicons name="play" size={24} color="#FFFFFF" />
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
       </View>
       {isOwn && avatar && (
         <Image source={{ uri: avatar }} style={styles.avatar} />
+      )}
+
+      {videoUrl && (
+        <VideoPlayerModal 
+          videoUrl={videoUrl}
+          visible={videoModalVisible}
+          onClose={closeVideoModal}
+        />
       )}
     </View>
   );
@@ -96,6 +148,32 @@ const styles = StyleSheet.create({
   verticalImage: {
     height: MAX_IMAGE_WIDTH / 9 * 16, // 竖向16:9的宽高比
   },
+  videoContainer: {
+    position: 'relative',
+    width: MAX_IMAGE_WIDTH,
+    overflow: 'hidden',
+  },
+  videoThumbnail: {
+    width: '100%',
+    borderRadius: 0,
+  },
+  playButtonContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
 });
 
 export default ChatMessage; 

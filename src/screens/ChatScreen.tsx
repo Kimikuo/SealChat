@@ -8,6 +8,8 @@ interface Message {
   id: string;
   text?: string;
   imageUrl?: string;
+  videoUrl?: string;
+  videoThumbnail?: string;
   isOwn: boolean;
   avatar?: string;
   timestamp?: string;
@@ -53,13 +55,29 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
     },
     {
       id: '4',
-      text: '听起来不错，我去下载看看。',
+      text: '我早就下载好了，你看这个视频',
       isOwn: true,
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
       timestamp: '09:13 am'
     },
     {
       id: '5',
+      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+      videoThumbnail: 'https://images.unsplash.com/photo-1452796651103-7c07fca7a2c1?q=80&w=2069&auto=format&fit=crop',
+      isOwn: true,
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: '09:13 am',
+      imageOrientation: 'vertical'
+    },
+    {
+      id: '6',
+      text: '听起来不错，我去下载看看。',
+      isOwn: false,
+      avatar: 'https://randomuser.me/api/portraits/women/17.jpg',
+      timestamp: '09:14 am'
+    },
+    {
+      id: '7',
       imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop',
       isOwn: true,
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
@@ -67,14 +85,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
       imageOrientation: 'horizontal'
     },
     {
-      id: '6',
+      id: '8',
       text: '我早就下载好了，你看图片，这是我们公司大楼',
       isOwn: true,
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
       timestamp: '09:15 am'
     },
     {
-      id: '7',
+      id: '9',
       imageUrl: 'https://images.unsplash.com/photo-1555952494-efd681c7e3f9?q=80&w=1160&auto=format&fit=crop',
       isOwn: false,
       avatar: 'https://randomuser.me/api/portraits/women/17.jpg',
@@ -82,21 +100,21 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
       imageOrientation: 'vertical'
     },
     {
-      id: '8',
+      id: '10',
       text: '这是我们的新办公室，刚刚装修好',
       isOwn: false,
       avatar: 'https://randomuser.me/api/portraits/women/17.jpg',
       timestamp: '09:16 am'
     },
     {
-      id: '9',
+      id: '11',
       text: '看起来很不错！我们下周一起去参观一下吧',
       isOwn: true,
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
       timestamp: '09:17 am'
     },
     {
-      id: '10',
+      id: '12',
       imageUrl: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop',
       isOwn: true,
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
@@ -179,6 +197,37 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
     setMessages([...messages, newMessage]);
   };
 
+  // 模拟发送视频
+  const handleSendVideo = () => {
+    // 视频缩略图和URL
+    const videoOptions = [
+      { 
+        thumbnailUrl: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1974&auto=format&fit=crop',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        orientation: 'horizontal'
+      },
+      { 
+        thumbnailUrl: 'https://images.unsplash.com/photo-1452796651103-7c07fca7a2c1?q=80&w=2069&auto=format&fit=crop',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        orientation: 'vertical'
+      }
+    ];
+    
+    const randomVideo = videoOptions[Math.floor(Math.random() * videoOptions.length)];
+    
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      videoUrl: randomVideo.videoUrl,
+      videoThumbnail: randomVideo.thumbnailUrl,
+      isOwn: true,
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      imageOrientation: randomVideo.orientation as 'horizontal' | 'vertical'
+    };
+    
+    setMessages([...messages, newMessage]);
+  };
+
   const renderTimestamp = (timestamp: string) => {
     return (
       <View style={styles.timestampContainer}>
@@ -224,6 +273,8 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
               <ChatMessage 
                 text={item.text} 
                 imageUrl={item.imageUrl}
+                videoUrl={item.videoUrl}
+                videoThumbnail={item.videoThumbnail}
                 isOwn={item.isOwn} 
                 avatar={item.avatar} 
                 timestamp={item.timestamp}
@@ -245,8 +296,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
             <View style={styles.inputContainer}>
               <View style={styles.inputRow}>
                 <ChatInput onSendMessage={handleSendMessage} />
-                <TouchableOpacity style={styles.imageButton} onPress={handleSendImage}>
+                <TouchableOpacity style={styles.iconButton} onPress={handleSendImage}>
                   <Ionicons name="image" size={24} color="#F7A10D" />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.iconButton} onPress={handleSendVideo}>
+                  <Ionicons name="videocam" size={24} color="#F7A10D" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -254,8 +308,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ route, navigation }) => {
         ) : (
           <View style={styles.inputRow}>
             <ChatInput onSendMessage={handleSendMessage} />
-            <TouchableOpacity style={styles.imageButton} onPress={handleSendImage}>
+            <TouchableOpacity style={styles.iconButton} onPress={handleSendImage}>
               <Ionicons name="image" size={24} color="#F7A10D" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} onPress={handleSendVideo}>
+              <Ionicons name="videocam" size={24} color="#F7A10D" />
             </TouchableOpacity>
           </View>
         )}
@@ -320,7 +377,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  imageButton: {
+  iconButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',

@@ -6,11 +6,13 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import ChatListScreen from '../screens/ChatListScreen';
 import ChatScreen from '../screens/ChatScreen';
+import VideoPlayerScreen from '../screens/VideoPlayerScreen';
 
 // 定义导航参数类型
 export type RootStackParamList = {
   Main: undefined;
   Chat: { contactName: string };
+  VideoPlayer: { videoUrl: string };
 };
 
 export type MainTabParamList = {
@@ -78,17 +80,26 @@ const MainTabNavigator = () => {
 };
 
 // 主导航
-const AppNavigator = () => {
+const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
+        initialRouteName="Main"
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: '#121212' },
+          contentStyle: { backgroundColor: '#1A1A1A' },
         }}
       >
         <Stack.Screen name="Main" component={MainTabNavigator} />
         <Stack.Screen name="Chat" component={ChatScreen} />
+        <Stack.Screen 
+          name="VideoPlayer" 
+          component={VideoPlayerScreen} 
+          options={{
+            presentation: 'fullScreenModal',
+            animation: 'fade',
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
